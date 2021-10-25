@@ -15,7 +15,7 @@ const main = async () => {
 
   // We get the contract to deploy
   const gameContractFactory = await hre.ethers.getContractFactory('HalloweenHorror');
-  const gameContract = await gameContractFactory.deploy(['Amanda', 'Derik', 'Jeff'], ['/images/people/01.png', '/images/people/01.png', '/images/people/01.png'], [300, 100, 100], [10, 25, 21]);
+  const gameContract = await gameContractFactory.deploy(['Amanda', 'Derik', 'Jeff'], ['https://halloweenhorror.xyz/images/people/amanda.png', 'https://halloweenhorror.xyz/images/people/derik.png', 'https://halloweenhorror.xyz/images/people/jeff.png'], [300, 100, 100], [10, 25, 21]);
 
   await gameContract.deployed();
 
