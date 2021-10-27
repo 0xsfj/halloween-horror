@@ -21,6 +21,16 @@ contract HalloweenHorror is ERC721 {
         uint256 attackDamage;
     }
 
+    struct Horror {
+        string name;
+        string imageURI;
+        uint256 health;
+        uint256 maxHealth;
+        uint256 attackDamage;
+    }
+
+    Horror public horror;
+
     // Token Ids
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -37,8 +47,28 @@ contract HalloweenHorror is ERC721 {
         string[] memory characterNames,
         string[] memory characterImageURIs,
         uint256[] memory characterHealth,
-        uint256[] memory characterAttackDamage
+        uint256[] memory characterAttackDamage,
+        string memory horrorName,
+        string memory horrorImageURI,
+        uint256 horrorHealth,
+        uint256 horrorAttackDamage
     ) ERC721("Halloween Horror College Students", "College Student") {
+        // Initialize the Horror that will befall the students
+        horror = Horror({
+            name: horrorName,
+            imageURI: horrorImageURI,
+            health: horrorHealth,
+            maxHealth: horrorHealth,
+            attackDamage: horrorAttackDamage
+        });
+
+        console.log(
+            "Done Initializing Horror: %s with %s health - %s",
+            horror.name,
+            horror.health,
+            horror.imageURI
+        );
+
         for (uint256 i = 0; i < characterNames.length; i += 1) {
             characters.push(
                 CharacterAttributes({
@@ -60,6 +90,58 @@ contract HalloweenHorror is ERC721 {
             );
         }
         _tokenIds.increment();
+    }
+
+    // Attack Horror
+    function attackHorror() public {
+        // Get the state of the players NFT
+        uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+        CharacterAttributes storage player = nftHolderAttributes[
+            nftTokenIdOfPlayer
+        ];
+        console.log(
+            "Player with student %s is about to attack. They have %s health and %s attack damage",
+            player.name,
+            player.health,
+            player.attackDamage
+        );
+        console.log(
+            "The horror has %s health and %s attack damage",
+            horror.health,
+            horror.attackDamage
+        );
+
+        // Make sure the player has enough health to attack
+        require(player.health > 0, "You have no health left to attack with");
+
+        // Make sure the boss has more than 0 health
+        require(
+            horror.health > 0,
+            "The horror is already dead no need to attack"
+        );
+
+        // Attack the Horror
+        // Subtract the attack damage from the horror's health
+        // If the horror's health is 0 or less, then the horror is dead
+        if (horror.health < player.attackDamage) {
+            horror.health = 0;
+        } else {
+            horror.health = horror.health - player.attackDamage;
+        }
+
+        // Attack the Player
+        // Subtract the horror's attack damage from the player's health
+        // If the player's health is 0 or less, then the player is dead
+        if (player.health < horror.attackDamage) {
+            player.health = 0;
+        } else {
+            player.health = player.health - horror.attackDamage;
+        }
+
+        console.log(
+            "Horror attacked player now the player has %s health",
+            player.health
+        );
     }
 
     // Users run mintCharacter to mint character
