@@ -13,7 +13,7 @@ import "hardhat/console.sol";
 
 contract HalloweenHorror is ERC721 {
     struct CharacterAttributes {
-        uint256 characterId;
+        uint256 characterIndex;
         string name;
         string imageURI;
         uint256 health;
@@ -42,6 +42,13 @@ contract HalloweenHorror is ERC721 {
 
     // Map the address to the NFT's tokenId
     mapping(address => uint256) public nftHolders;
+
+    event CharacterNFTMinted(
+        address sender,
+        uint256 tokenId,
+        uint256 characterIndex
+    );
+    event AttackComplete(uint256 newHorrorHealth, uint256 newCharacterHealth);
 
     constructor(
         string[] memory characterNames,
@@ -72,7 +79,7 @@ contract HalloweenHorror is ERC721 {
         for (uint256 i = 0; i < characterNames.length; i += 1) {
             characters.push(
                 CharacterAttributes({
-                    characterId: i,
+                    characterIndex: i,
                     name: characterNames[i],
                     imageURI: characterImageURIs[i],
                     health: characterHealth[i],
@@ -92,10 +99,40 @@ contract HalloweenHorror is ERC721 {
         _tokenIds.increment();
     }
 
+    // Check if the user is the owner of the NFT
+    function checkIfUserHasNFT()
+        public
+        view
+        returns (CharacterAttributes memory)
+    {
+        uint256 userNftTokenId = nftHolders[msg.sender];
+        if (userNftTokenId > 0) {
+            // If the user has an NFT, return the attributes of the NFT
+            return nftHolderAttributes[userNftTokenId];
+        } else {
+            // User does not have an NFT
+            CharacterAttributes memory emptyStruct;
+            return emptyStruct;
+        }
+    }
+
+    function getAllCharacters()
+        public
+        view
+        returns (CharacterAttributes[] memory)
+    {
+        return characters;
+    }
+
+    function getHorror() public view returns (Horror memory) {
+        return horror;
+    }
+
     // Attack Horror
     function attackHorror() public {
         // Get the state of the players NFT
         uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+        // Get the state of the horror
         CharacterAttributes storage player = nftHolderAttributes[
             nftTokenIdOfPlayer
         ];
@@ -145,10 +182,12 @@ contract HalloweenHorror is ERC721 {
             player.name,
             player.health
         );
+
+        emit AttackComplete(horror.health, player.health);
     }
 
     // Users run mintCharacter to mint character
-    function mintCharacter(uint256 _characterId) external {
+    function mintCharacter(uint256 _characterIndex) external {
         // Get current tokenId
         uint256 newItemId = _tokenIds.current();
 
@@ -157,23 +196,25 @@ contract HalloweenHorror is ERC721 {
 
         // Map the tokenId to the character's attributes
         nftHolderAttributes[newItemId] = CharacterAttributes({
-            characterId: _characterId,
-            name: characters[_characterId].name,
-            imageURI: characters[_characterId].imageURI,
-            health: characters[_characterId].health,
-            maxHealth: characters[_characterId].health,
-            attackDamage: characters[_characterId].attackDamage
+            characterIndex: _characterIndex,
+            name: characters[_characterIndex].name,
+            imageURI: characters[_characterIndex].imageURI,
+            health: characters[_characterIndex].health,
+            maxHealth: characters[_characterIndex].health,
+            attackDamage: characters[_characterIndex].attackDamage
         });
 
         console.log(
-            "Minted NFT with id %s and characterId %s",
+            "Minted NFT with id %s and characterIndex %s",
             newItemId,
-            _characterId
+            _characterIndex
         );
 
         nftHolders[msg.sender] = newItemId;
 
         _tokenIds.increment();
+
+        emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
     }
 
     function tokenURI(uint256 _tokenId)

@@ -30,20 +30,20 @@ const main = async () => {
 
   console.log('Halloween Horror deployed to:', gameContract.address);
 
-  let txn;
+  // let txn;
 
-  // Mint all contracts
-  txn = await gameContract.mintCharacter(0);
-  await txn.wait();
-  console.log('Minted Amanda');
-
-  txn = await gameContract.attackHorror();
-  await txn.wait();
+  // // Mint all contracts
+  // txn = await gameContract.mintCharacter(0);
+  // await txn.wait();
+  // console.log('Minted Amanda');
 
   // txn = await gameContract.attackHorror();
   // await txn.wait();
 
-  console.log('Done deploying');
+  // txn = await gameContract.attackHorror();
+  // await txn.wait();
+
+  // console.log('Done deploying');
 };
 
 // We recommend this pattern to be able to use async/await everywhere
