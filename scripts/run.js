@@ -33,26 +33,18 @@ const main = async () => {
   let txn;
 
   // Mint with an index of 2
-  txn = await gameContract.mintCharacter(2);
+  txn = await gameContract.mintCharacter(0);
   await txn.wait();
+  console.log('Minted Student NFT');
 
   txn = await gameContract.attackHorror();
   await txn.wait();
 
-  txn = await gameContract.attackHorror();
-  await txn.wait();
-  txn = await gameContract.attackHorror();
-  await txn.wait();
-  txn = await gameContract.attackHorror();
-  await txn.wait();
-  txn = await gameContract.attackHorror();
-  await txn.wait();
-  txn = await gameContract.attackHorror();
-  await txn.wait();
+  console.log('Attack Complete');
 
   // get the value of the NFT's URI
-  let returnedTokenUri = await gameContract.tokenURI(1);
-  console.log('Token URI: ', returnedTokenUri);
+  // let returnedTokenUri = await gameContract.tokenURI(1);
+  // console.log('Token URI: ', returnedTokenUri);
 };
 
 // We recommend this pattern to be able to use async/await everywhere

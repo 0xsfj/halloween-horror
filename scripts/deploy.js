@@ -15,7 +15,16 @@ const main = async () => {
 
   // We get the contract to deploy
   const gameContractFactory = await hre.ethers.getContractFactory('HalloweenHorror');
-  const gameContract = await gameContractFactory.deploy(['Amanda', 'Derik', 'Jeff'], ['https://halloweenhorror.xyz/images/people/amanda.png', 'https://halloweenhorror.xyz/images/people/derik.png', 'https://halloweenhorror.xyz/images/people/jeff.png'], [300, 100, 100], [10, 25, 21]);
+  const gameContract = await gameContractFactory.deploy(
+    ['Amanda', 'Derik', 'Jeff'],
+    ['https://halloweenhorror.xyz/images/people/amanda.png', 'https://halloweenhorror.xyz/images/people/derik.png', 'https://halloweenhorror.xyz/images/people/jeff.png'],
+    [300, 100, 100],
+    [10, 25, 21],
+    'Keven', // Horror Name
+    'https://static.wikia.nocookie.net/thecabininthewoods/images/5/52/Images-0.jpg/revision/latest/scale-to-width-down/390?cb=20180416114207',
+    420, // Max health
+    69 // Damage
+  );
 
   await gameContract.deployed();
 
@@ -28,15 +37,13 @@ const main = async () => {
   await txn.wait();
   console.log('Minted Amanda');
 
-  txn = await gameContract.mintCharacter(1);
+  txn = await gameContract.attackHorror();
   await txn.wait();
-  console.log('Minted Derik');
 
-  txn = await gameContract.mintCharacter(2);
-  await txn.wait();
-  console.log('Minted Jeff');
+  // txn = await gameContract.attackHorror();
+  // await txn.wait();
 
-  console.log('Done deploying and minting');
+  console.log('Done deploying');
 };
 
 // We recommend this pattern to be able to use async/await everywhere

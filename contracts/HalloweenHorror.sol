@@ -106,7 +106,8 @@ contract HalloweenHorror is ERC721 {
             player.attackDamage
         );
         console.log(
-            "The horror has %s health and %s attack damage",
+            "The %s has %s health and %s attack damage",
+            horror.name,
             horror.health,
             horror.attackDamage
         );
@@ -139,7 +140,9 @@ contract HalloweenHorror is ERC721 {
         }
 
         console.log(
-            "Horror attacked player now the player has %s health",
+            "%s attacked the college student, now the %s has %s health",
+            horror.name,
+            player.name,
             player.health
         );
     }
