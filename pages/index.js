@@ -2,6 +2,8 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { Flex, Spacer, Button, Icon, Text } from '@chakra-ui/react';
+import { ethers } from 'ethers';
+import halloweenHorrorAbi from '../artifacts/contracts/HalloweenHorror.sol/HalloweenHorror.json';
 
 const HalloweenHorror = (props) => {
   return (
@@ -17,6 +19,19 @@ const HalloweenHorror = (props) => {
 
 const Home = () => {
   const [currentAccount, setCurrentAccount] = useState(null);
+  const [characterNFT, setCharacterNFT] = useState(null);
+
+  const CONTRACT_ADDRESS = '0x6D780a873a316AC97ABEBF43Ea2639c223F7A2D3';
+
+  const transformCharacterData = (characterData) => {
+    return {
+      name: characterData.name,
+      imageURI: characterData.imageURI,
+      health: characterData.health.toNumber(),
+      maxHealth: characterData.maxHealth.toNumber(),
+      attackDamage: characterData.attackDamage.toNumber(),
+    };
+  };
 
   const checkIfWalletIsConnected = async () => {
     try {
@@ -63,9 +78,54 @@ const Home = () => {
     }
   };
 
+  const ConnectWallet = () => {
+    return (
+      <>
+        <Text textAlign="center">Connect your wallet to mint a trusty college student that will just try to survive halloween night in the woods!</Text>
+        <Text>Currently only on on Rinkeby Testnet</Text>
+        <Button onClick={connectWallet}>Connect Wallet</Button>
+      </>
+    );
+  };
+
+  const SelectCharacter = () => {
+    return (
+      <>
+        <Text>Select your Character with Account: {currentAccount.substring(0, 5)}...</Text>
+      </>
+    );
+  };
+
+  const Arena = () => {
+    return <Text>Arena</Text>;
+  };
+
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
+
+  useEffect(() => {
+    const fetchNFTMetadata = async () => {
+      console.log(`Checking for Character NFT on address: ${currentAccount}`);
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const gameContract = new ethers.Contract(CONTRACT_ADDRESS, halloweenHorrorAbi.abi, signer);
+
+      const txn = await gameContract.checkIfUserHasNFT();
+      if (txn.name) {
+        console.log(`User has NFT`);
+        setCharacterNFT(transformCharacterData(txn));
+      } else {
+        console.log(`Account ${currentAccount} does not have a Halloween Horror College Student NFT`);
+      }
+    };
+
+    if (currentAccount) {
+      console.log(`Current Account: ${currentAccount}`);
+      fetchNFTMetadata();
+    }
+  }, [currentAccount]);
 
   return (
     <>
@@ -77,10 +137,9 @@ const Home = () => {
 
       <Flex as="main" flexDirection="column" justifyContent="center" alignItems="center" minH="100vh">
         <HalloweenHorror w="50vw" h="100%" mb="8" />
-        {currentAccount === null ? <Button onClick={connectWallet}>Connect Wallet</Button> : <Button onClick={() => console.log(`game`)}>Play Game</Button>}
-        <Text mt="4">{currentAccount}</Text>
-        <Text>Connect your wallet to mint a trusty college student that will just try to survive halloween night in the woods!</Text>
-        <Text>Currently on Rinkeby Testnet</Text>
+        {currentAccount === null ? <ConnectWallet /> : null}
+        {currentAccount === null ? null : <SelectCharacter />}
+        {characterNFT === null ? null : <Arena />}
       </Flex>
     </>
   );
