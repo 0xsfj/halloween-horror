@@ -1,7 +1,7 @@
 import Head from 'next/head';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { Flex, Spacer, Button, Icon, Text } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Icon, Text, SimpleGrid, Box, Image, Badge, Stack, Progress } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import halloweenHorrorAbi from '../artifacts/contracts/HalloweenHorror.sol/HalloweenHorror.json';
 
@@ -20,6 +20,8 @@ const HalloweenHorror = (props) => {
 const Home = () => {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
+
+  const [attackInfo, setAttackInfo] = useState('');
 
   const CONTRACT_ADDRESS = '0x6D780a873a316AC97ABEBF43Ea2639c223F7A2D3';
 
@@ -89,15 +91,204 @@ const Home = () => {
   };
 
   const SelectCharacter = () => {
+    const [characters, setCharacters] = useState([]);
+    const [gameContract, setGameContract] = useState(null);
+
+    useEffect(() => {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const gameContract = new ethers.Contract(CONTRACT_ADDRESS, halloweenHorrorAbi.abi, signer);
+
+        setGameContract(gameContract);
+      } else {
+        console.log('No ethereum object found');
+      }
+    }, []);
+
+    useEffect(() => {
+      // Get all characters
+      const getCharacters = async () => {
+        try {
+          console.log('Getting characters');
+          const charactersTxn = await gameContract.getAllCharacters();
+          console.log('Characters', charactersTxn);
+
+          const characters = charactersTxn.map((characterData) => {
+            console.log('Character data', characterData);
+            return transformCharacterData(characterData);
+          });
+
+          setCharacters(characters);
+        } catch (error) {
+          console.log(`Something went wrong fetching all characters`);
+          console.log(error);
+        }
+      };
+      const onCharacterMint = async (sender, tokenId, characterIndex) => {
+        console.log(`College Student Minted - Sender: ${sender}, tokenId: ${tokenId.toNumber()}, Character Index: ${characterIndex.toNumber()} `);
+        if (gameContract) {
+          const characterNft = await gameContract.checkIfUserHasNFT();
+          console.log('Character NFT', characterNft);
+          console.log(`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`);
+          setCharacterNFT(transformCharacterData(characterNft));
+        }
+      };
+
+      if (gameContract) {
+        getCharacters();
+        gameContract.on('CharacterNFTMinted', onCharacterMint);
+      }
+
+      // return () => {
+      //   if (gameContract) {
+      //     gameContract.off('CharacterNFTMinted', onCharacterMint);
+      //   }
+      // };
+    }, [gameContract]);
+
+    console.log(characters);
+
+    const mintCharacterNFTAction = async (nftId) => {
+      console.log(`Minting character: ${nftId} `);
+      try {
+        if (gameContract) {
+          const mintTxn = await gameContract.mintCharacter(nftId);
+          await mintTxn.wait();
+          console.log('Minted character', mintTxn);
+        }
+      } catch (error) {
+        console.log(`Something went wrong minting character`);
+        console.log(error);
+      }
+    };
+
     return (
       <>
-        <Text>Select your Character with Account: {currentAccount.substring(0, 5)}...</Text>
+        <Text>Select your College Student that will be deep in the woods halloween night: {currentAccount.substring(0, 5)}...</Text>
+        <SimpleGrid columns={3} spacing={4} mt="8">
+          {characters.map((character, index) => {
+            return (
+              <Box key={index}>
+                <Image src={character.imageURI} alt={character.name} mb="4" />
+                <Text textAlign="center">{character.name}</Text>
+                <Stack direction="row">
+                  <Badge variant="outline" colorScheme="red">
+                    Attack Damage: {character.attackDamage}
+                  </Badge>
+                  <Badge variant="outline" colorScheme="green">
+                    Max Health: {character.maxHealth}
+                  </Badge>
+                </Stack>
+
+                <Button onClick={() => mintCharacterNFTAction(index)}>Mint {character.name}</Button>
+              </Box>
+            );
+          })}
+        </SimpleGrid>
       </>
     );
   };
 
   const Arena = () => {
-    return <Text>Arena</Text>;
+    const [gameContract, setGameContract] = useState(null);
+    const [horror, setHorror] = useState(null);
+
+    useEffect(() => {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const gameContract = new ethers.Contract(CONTRACT_ADDRESS, halloweenHorrorAbi.abi, signer);
+
+        setGameContract(gameContract);
+      } else {
+        console.log('No ethereum object found');
+      }
+    }, []);
+
+    useEffect(() => {
+      const getHorror = async () => {
+        const horrorTxn = await gameContract.getHorror();
+        console.log('Horror', horrorTxn);
+        setHorror(transformCharacterData(horrorTxn));
+      };
+
+      const onAttackComplete = async (newHorrorsHealth, newPlayerHealth) => {
+        const horrorHealth = newHorrorsHealth.toNumber();
+        const playerHealth = newPlayerHealth.toNumber();
+
+        console.log(`Horror Health: ${horrorHealth} Player Health: ${playerHealth}`);
+
+        setHorror((prevState) => {
+          return { ...prevState, health: horrorHealth };
+        });
+
+        setCharacterNFT((prevState) => {
+          return { ...prevState, health: playerHealth };
+        });
+      };
+
+      if (gameContract) {
+        getHorror();
+        gameContract.on('AttackComplete', onAttackComplete);
+      }
+
+      // return () => {
+      //   if (gameContract) {
+      //     gameContract.off('AttackComplete', onAttackComplete);
+      //   }
+      // };
+    }, [gameContract]);
+
+    const attackAction = async () => {
+      console.log('Attacking');
+
+      try {
+        if (gameContract) {
+          setAttackInfo('Attacking');
+          const attackTxn = await gameContract.attackHorror();
+          await attackTxn.wait();
+          console.log('Attacked', attackTxn);
+          setAttackInfo('Attacked and Hit');
+        }
+      } catch (error) {
+        console.log(`Something went wrong attacking`);
+        console.log(error);
+        setAttackInfo('');
+      }
+    };
+
+    console.log({ horror });
+    console.log({ characterNFT });
+
+    if (!horror) {
+      return <Text>Loading...</Text>;
+    }
+
+    return (
+      <>
+        <Text>Arena</Text>
+        <Text>{attackInfo}</Text>
+        <Box w="100%">
+          <Text>Horror</Text>
+          <Image src={horror.imageURI} alt={horror.name} />
+          <Text>{horror.name}</Text>
+
+          <Progress value={horror.health} max={horror.maxHealth} min={0} colorScheme="green" />
+          <Button onClick={() => attackAction()}>Attack</Button>
+          <Text>College Student</Text>
+        </Box>
+        <Box w="100%">
+          <Text>College Student</Text>
+          <Image src={characterNFT.imageURI} alt={characterNFT.name} />
+          <Text>{characterNFT.name}</Text>
+
+          <Progress value={characterNFT.health} max={characterNFT.maxHealth} min={0} colorScheme="green" />
+        </Box>
+      </>
+    );
   };
 
   useEffect(() => {
@@ -135,7 +326,7 @@ const Home = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Flex as="main" flexDirection="column" justifyContent="center" alignItems="center" minH="100vh">
+      <Flex as="main" flexDirection="column" justifyContent="center" alignItems="center" minH="100vh" p="10">
         <HalloweenHorror w="50vw" h="100%" mb="8" />
         {currentAccount === null ? <ConnectWallet /> : null}
         {currentAccount === null ? null : <SelectCharacter />}
