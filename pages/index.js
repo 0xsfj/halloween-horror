@@ -24,7 +24,7 @@ const Home = () => {
 
   const [attackInfo, setAttackInfo] = useState('');
 
-  const CONTRACT_ADDRESS = '0x6D780a873a316AC97ABEBF43Ea2639c223F7A2D3';
+  const CONTRACT_ADDRESS = '0x8737012360C3e571e3346296291B4b8F2EE80e36';
 
   const transformCharacterData = (characterData) => {
     return {
