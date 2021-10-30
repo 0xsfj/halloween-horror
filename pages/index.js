@@ -1,7 +1,7 @@
 import Head from 'next/head';
 // import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { Flex, Spacer, Button, Icon, Text, SimpleGrid, Box, Image, Badge, Stack, Progress } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Icon, Text, SimpleGrid, Box, Image, Badge, Stack, Progress, useToast, Container } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import halloweenHorrorAbi from '../artifacts/contracts/HalloweenHorror.sol/HalloweenHorror.json';
 
@@ -18,6 +18,7 @@ const HalloweenHorror = (props) => {
 };
 
 const Home = () => {
+  const toast = useToast();
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
 
@@ -40,6 +41,12 @@ const Home = () => {
       const { ethereum } = window;
 
       if (!ethereum) {
+        toast({
+          title: 'Account created.',
+          description: 'Make sure you have a wallet installed',
+          status: 'warning',
+          isClosable: true,
+        });
         console.log('Make sure you have a wallet installed');
       } else {
         console.log('Wallet is installed', ethereum);
@@ -269,24 +276,28 @@ const Home = () => {
 
     return (
       <>
-        <Text>Arena</Text>
-        <Text>{attackInfo}</Text>
-        <Box w="100%">
-          <Text>Horror</Text>
-          <Image src={horror.imageURI} alt={horror.name} />
-          <Text>{horror.name}</Text>
+        <Container>
+          <Text>Arena</Text>
+          <Text>{attackInfo}</Text>
+          <SimpleGrid columns={2} spacing={4} mt="8">
+            <Box w="100%">
+              <Text>Horror</Text>
+              <Image src={horror.imageURI} alt={horror.name} />
+              <Text>{horror.name}</Text>
 
-          <Progress value={horror.health} max={horror.maxHealth} min={0} colorScheme="green" />
-          <Button onClick={() => attackAction()}>Attack</Button>
-          <Text>College Student</Text>
-        </Box>
-        <Box w="100%">
-          <Text>College Student</Text>
-          <Image src={characterNFT.imageURI} alt={characterNFT.name} />
-          <Text>{characterNFT.name}</Text>
+              <Progress value={horror.health} max={horror.maxHealth} min={0} colorScheme="green" />
+              <Button onClick={() => attackAction()}>Attack</Button>
+              <Text>College Student</Text>
+            </Box>
+            <Box w="100%">
+              <Text>College Student</Text>
+              <Image src={characterNFT.imageURI} alt={characterNFT.name} />
+              <Text>{characterNFT.name}</Text>
 
-          <Progress value={characterNFT.health} max={characterNFT.maxHealth} min={0} colorScheme="green" />
-        </Box>
+              <Progress value={characterNFT.health} max={characterNFT.maxHealth} min={0} colorScheme="green" />
+            </Box>
+          </SimpleGrid>
+        </Container>
       </>
     );
   };

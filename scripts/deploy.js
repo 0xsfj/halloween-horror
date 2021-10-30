@@ -17,11 +17,11 @@ const main = async () => {
   const gameContractFactory = await hre.ethers.getContractFactory('HalloweenHorror');
   const gameContract = await gameContractFactory.deploy(
     ['Amanda', 'Derik', 'Jeff'],
-    ['https://halloweenhorror.xyz/images/people/amanda.png', 'https://halloweenhorror.xyz/images/people/derik.png', 'https://halloweenhorror.xyz/images/people/jeff.png'],
+    ['https://halloweenhorror.xyz/images/people/amanda.svg', 'https://halloweenhorror.xyz/images/people/derik.svg', 'https://halloweenhorror.xyz/images/people/jeff.svg'],
     [300, 100, 100],
     [10, 25, 21],
-    'Keven', // Horror Name
-    'https://static.wikia.nocookie.net/thecabininthewoods/images/5/52/Images-0.jpg/revision/latest/scale-to-width-down/390?cb=20180416114207',
+    'Werewolf', // Horror Name
+    'https://halloweenhorror.xyz/images/horrors/werewolf.svg',
     420, // Max health
     69 // Damage
   );
