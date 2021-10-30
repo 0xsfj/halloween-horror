@@ -49,6 +49,12 @@ const Home = () => {
         });
         console.log('Make sure you have a wallet installed');
       } else {
+        toast({
+          title: 'Wallet is Connected',
+          description: 'You can now interact with the contract',
+          status: 'success',
+          isClosable: true,
+        });
         console.log('Wallet is installed', ethereum);
       }
 
@@ -120,10 +126,8 @@ const Home = () => {
         try {
           console.log('Getting characters');
           const charactersTxn = await gameContract.getAllCharacters();
-          console.log('Characters', charactersTxn);
 
           const characters = charactersTxn.map((characterData) => {
-            console.log('Character data', characterData);
             return transformCharacterData(characterData);
           });
 
@@ -148,11 +152,11 @@ const Home = () => {
         gameContract.on('CharacterNFTMinted', onCharacterMint);
       }
 
-      // return () => {
-      //   if (gameContract) {
-      //     gameContract.off('CharacterNFTMinted', onCharacterMint);
-      //   }
-      // };
+      return () => {
+        if (gameContract) {
+          gameContract.off('CharacterNFTMinted', onCharacterMint);
+        }
+      };
     }, [gameContract]);
 
     console.log(characters);
@@ -242,11 +246,11 @@ const Home = () => {
         gameContract.on('AttackComplete', onAttackComplete);
       }
 
-      // return () => {
-      //   if (gameContract) {
-      //     gameContract.off('AttackComplete', onAttackComplete);
-      //   }
-      // };
+      return () => {
+        if (gameContract) {
+          gameContract.off('AttackComplete', onAttackComplete);
+        }
+      };
     }, [gameContract]);
 
     const attackAction = async () => {
