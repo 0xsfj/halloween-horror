@@ -176,7 +176,7 @@ const Home = () => {
     };
 
     return (
-      <>
+      <Container>
         <Text>Select your College Student that will be deep in the woods halloween night: {currentAccount.substring(0, 5)}...</Text>
         <SimpleGrid columns={3} spacing={4} mt="8">
           {characters.map((character, index) => {
@@ -198,7 +198,7 @@ const Home = () => {
             );
           })}
         </SimpleGrid>
-      </>
+      </Container>
     );
   };
 
