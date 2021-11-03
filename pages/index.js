@@ -217,7 +217,9 @@ const Home = () => {
                     </Badge>
                   </Stack>
 
-                  <Button onClick={() => mintCharacterNFTAction(index)}>Mint {character.name}</Button>
+                  <Button onClick={() => mintCharacterNFTAction(index)} variant="outline" isFullWidth colorScheme="red">
+                    Mint {character.name}
+                  </Button>
                 </Box>
               );
             })}
