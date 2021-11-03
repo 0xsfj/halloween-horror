@@ -22,6 +22,8 @@ const Home = () => {
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
 
+  const [correctChain, setCorrectChain] = useState(false);
+
   const [attackInfo, setAttackInfo] = useState('');
 
   const CONTRACT_ADDRESS = '0x8737012360C3e571e3346296291B4b8F2EE80e36';
@@ -40,32 +42,49 @@ const Home = () => {
     try {
       const { ethereum } = window;
 
-      if (!ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const { chainId } = await provider.getNetwork();
+      console.log({ chainId });
+
+      if (chainId !== 4) {
         toast({
-          title: 'Account created.',
-          description: 'Make sure you have a wallet installed',
-          status: 'warning',
+          title: 'Wrong Network',
+          description: 'Please switch to the Rinkeby test network',
+          status: 'error',
           isClosable: true,
         });
-        console.log('Make sure you have a wallet installed');
+        setCorrectChain(false);
       } else {
-        toast({
-          title: 'Wallet is Connected',
-          description: 'You can now interact with the contract',
-          status: 'success',
-          isClosable: true,
-        });
-        console.log('Wallet is installed', ethereum);
-      }
+        setCorrectChain(true);
+        if (!ethereum) {
+          toast({
+            title: 'Account created.',
+            description: 'Make sure you have a wallet installed',
+            status: 'warning',
+            isClosable: true,
+          });
 
-      const accounts = await ethereum.request({ method: 'eth_accounts' });
+          console.log('Make sure you have a wallet installed');
+        } else {
+          toast({
+            title: 'Wallet is Connected',
+            description: 'You can now interact with the contract',
+            status: 'success',
+            isClosable: true,
+          });
+          console.log('Wallet is installed', ethereum);
+        }
 
-      if (accounts.length !== 0) {
-        const account = accounts[0];
-        console.log(`Found authorised account: ${account}`);
-        setCurrentAccount(account);
-      } else {
-        console.log('No accounts found');
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+        console.log('Accounts', accounts);
+
+        if (accounts.length !== 0) {
+          const account = accounts[0];
+          console.log(`Found authorised account: ${account}`);
+          setCurrentAccount(account);
+        } else {
+          console.log('No accounts found');
+        }
       }
     } catch (error) {
       console.log(error);
@@ -109,9 +128,11 @@ const Home = () => {
 
     useEffect(() => {
       const { ethereum } = window;
+      console.log(ethereum);
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
+
         const gameContract = new ethers.Contract(CONTRACT_ADDRESS, halloweenHorrorAbi.abi, signer);
 
         setGameContract(gameContract);
@@ -177,27 +198,29 @@ const Home = () => {
 
     return (
       <Container>
-        <Text>Select your College Student that will be deep in the woods halloween night: {currentAccount.substring(0, 5)}...</Text>
-        <SimpleGrid columns={3} spacing={4} mt="8">
-          {characters.map((character, index) => {
-            return (
-              <Box key={index}>
-                <Image src={character.imageURI} alt={character.name} mb="4" />
-                <Text textAlign="center">{character.name}</Text>
-                <Stack direction="row">
-                  <Badge variant="outline" colorScheme="red">
-                    Attack Damage: {character.attackDamage}
-                  </Badge>
-                  <Badge variant="outline" colorScheme="green">
-                    Max Health: {character.maxHealth}
-                  </Badge>
-                </Stack>
+        <>
+          <Text>Select your College Student that will be deep in the woods halloween night: {currentAccount.substring(0, 5)}...</Text>
+          <SimpleGrid columns={3} spacing={4} mt="8">
+            {characters.map((character, index) => {
+              return (
+                <Box key={index}>
+                  <Image src={character.imageURI} alt={character.name} mb="4" />
+                  <Text textAlign="center">{character.name}</Text>
+                  <Stack direction="row">
+                    <Badge variant="outline" colorScheme="red">
+                      Attack Damage: {character.attackDamage}
+                    </Badge>
+                    <Badge variant="outline" colorScheme="green">
+                      Max Health: {character.maxHealth}
+                    </Badge>
+                  </Stack>
 
-                <Button onClick={() => mintCharacterNFTAction(index)}>Mint {character.name}</Button>
-              </Box>
-            );
-          })}
-        </SimpleGrid>
+                  <Button onClick={() => mintCharacterNFTAction(index)}>Mint {character.name}</Button>
+                </Box>
+              );
+            })}
+          </SimpleGrid>
+        </>
       </Container>
     );
   };
@@ -343,9 +366,15 @@ const Home = () => {
 
       <Flex as="main" flexDirection="column" justifyContent="center" alignItems="center" minH="100vh" p="10">
         <HalloweenHorror w="50vw" h="100%" mb="8" />
-        {currentAccount === null ? <ConnectWallet /> : null}
-        {currentAccount === null ? null : <SelectCharacter />}
-        {characterNFT === null ? null : <Arena />}
+        {correctChain ? (
+          <>
+            {currentAccount === null ? <ConnectWallet /> : null}
+            {currentAccount === null ? null : <SelectCharacter />}
+            {characterNFT === null ? null : <Arena />}
+          </>
+        ) : (
+          <Text>Please switch to Rinkeby to play this game</Text>
+        )}
       </Flex>
     </>
   );
