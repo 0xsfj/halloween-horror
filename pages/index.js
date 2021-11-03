@@ -1,8 +1,10 @@
 import Head from 'next/head';
 // import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { Flex, Spacer, Button, Icon, Text, SimpleGrid, Box, Image, Badge, Stack, Progress, useToast, Container } from '@chakra-ui/react';
+import { Flex, Spacer, Button, Icon, Text, SimpleGrid, Box, Image, Badge, Stack, Progress, useToast, Container, Heading, Grid } from '@chakra-ui/react';
 import { ethers } from 'ethers';
+import { GiAxeSword } from 'react-icons/gi';
+
 import halloweenHorrorAbi from '../artifacts/contracts/HalloweenHorror.sol/HalloweenHorror.json';
 
 const HalloweenHorror = (props) => {
@@ -200,13 +202,13 @@ const Home = () => {
       <Container>
         <>
           <Text>Select your College Student that will be deep in the woods halloween night: {currentAccount.substring(0, 5)}...</Text>
-          <SimpleGrid columns={3} spacing={4} mt="8">
+          <SimpleGrid columns={3} spacing={4} mt="8" mb="8">
             {characters.map((character, index) => {
               return (
                 <Box key={index}>
                   <Image src={character.imageURI} alt={character.name} mb="4" />
                   <Text textAlign="center">{character.name}</Text>
-                  <Stack direction="row">
+                  <Stack mb="4">
                     <Badge variant="outline" colorScheme="red">
                       Attack Damage: {character.attackDamage}
                     </Badge>
@@ -304,17 +306,20 @@ const Home = () => {
     return (
       <>
         <Container>
-          <Text>Arena</Text>
+          <Heading>Arena</Heading>
           <Text>{attackInfo}</Text>
-          <SimpleGrid columns={2} spacing={4} mt="8">
+          <Grid templateColumns="1fr auto 1fr" gap="8" mt="8">
             <Box w="100%">
-              <Text>Horror</Text>
+              <Text textAlign={'center'}>Horror</Text>
               <Image src={horror.imageURI} alt={horror.name} />
               <Text>{horror.name}</Text>
 
               <Progress value={horror.health} max={horror.maxHealth} min={0} colorScheme="green" />
-              <Button onClick={() => attackAction()}>Attack</Button>
-              <Text>College Student</Text>
+            </Box>
+            <Box w="100%">
+              <Button onClick={() => attackAction()} leftIcon={<GiAxeSword />} colorScheme="red" variant="solid" size={'lg'}>
+                Attack
+              </Button>
             </Box>
             <Box w="100%">
               <Text>College Student</Text>
@@ -323,7 +328,7 @@ const Home = () => {
 
               <Progress value={characterNFT.health} max={characterNFT.maxHealth} min={0} colorScheme="green" />
             </Box>
-          </SimpleGrid>
+          </Grid>
         </Container>
       </>
     );
