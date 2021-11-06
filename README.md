@@ -9,8 +9,11 @@ Halloween Horror is a character driven horror fighting game. Loosely based off t
 - [ ] Add Story
 - [ ] Add Music
 - [ ] Add Loaders
-- [ ] Broken ABI on publish
+- [x] Broken ABI on publish
 - [ ] Refactor
+- [ ] Web3 Modal
+  - [ ] Wallet Connect Provider
+  - [x] Metamask Provider 
 
 <https://halloweenhorror.xyz/>
 
