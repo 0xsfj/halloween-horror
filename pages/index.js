@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { Flex, Spacer, Button, Icon, Text, SimpleGrid, Box, Image, Badge, Stack, Progress, useToast, Container, Heading, Grid } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import { GiAxeSword } from 'react-icons/gi';
+import WalletConnectProvider from '@walletconnect/web3-provider';
+import Web3Modal from 'web3modal';
 
 import halloweenHorrorAbi from '../artifacts/contracts/HalloweenHorror.sol/HalloweenHorror.json';
 
@@ -20,13 +22,14 @@ const HalloweenHorror = (props) => {
 };
 
 const Home = () => {
-  const toast = useToast();
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
-
   const [correctChain, setCorrectChain] = useState(false);
-
   const [attackInfo, setAttackInfo] = useState('');
+
+  const toast = useToast();
 
   const CONTRACT_ADDRESS = '0x8737012360C3e571e3346296291B4b8F2EE80e36';
 
@@ -44,7 +47,28 @@ const Home = () => {
     try {
       const { ethereum } = window;
 
-      const provider = new ethers.providers.Web3Provider(ethereum);
+      // const providerOptions = {
+      //   walletconnect: {
+      //     package: WalletConnectProvider, // required
+      //     options: {
+      //       infuraId: 'INFURA_ID', // required
+      //     },
+      //   },
+      // };
+
+      const web3Modal = new Web3Modal({
+        network: 'rinkeby',
+        cacheProvider: true,
+        // providerOptions,
+      });
+
+      const modalProvider = await web3Modal.connect();
+
+      const provider = new ethers.providers.Web3Provider(modalProvider);
+
+      setProvider(provider);
+      setSigner(provider.getSigner());
+
       const { chainId } = await provider.getNetwork();
       console.log({ chainId });
 
@@ -132,8 +156,8 @@ const Home = () => {
       const { ethereum } = window;
       console.log(ethereum);
       if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
+        // const provider = new ethers.providers.Web3Provider(ethereum);
+        // const signer = provider.getSigner();
 
         const gameContract = new ethers.Contract(CONTRACT_ADDRESS, halloweenHorrorAbi.abi, signer);
 
@@ -236,8 +260,8 @@ const Home = () => {
     useEffect(() => {
       const { ethereum } = window;
       if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
+        // const provider = new ethers.providers.Web3Provider(ethereum);
+        // const signer = provider.getSigner();
         const gameContract = new ethers.Contract(CONTRACT_ADDRESS, halloweenHorrorAbi.abi, signer);
 
         setGameContract(gameContract);
